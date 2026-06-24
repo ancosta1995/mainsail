@@ -1,5 +1,7 @@
 <template>
-    <v-container fluid py-0 px-0>
+    <div>
+        <support-config-login-panel v-if="!configAuthenticated" @authenticated="onAuthenticated" />
+        <v-container v-else fluid py-0 px-0>
         <v-row>
             <v-col class="col-12 col-md-6 pb-0 pb-md-3">
                 <config-files-panel></config-files-panel>
@@ -19,6 +21,7 @@
             </v-col>
         </v-row>
     </v-container>
+    </div>
 </template>
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
@@ -29,6 +32,10 @@ import LogfilesPanel from '@/components/panels/Machine/LogfilesPanel.vue'
 import EndstopPanel from '@/components/panels/Machine/EndstopPanel.vue'
 import ConfigFilesPanel from '@/components/panels/Machine/ConfigFilesPanel.vue'
 import SystemPanel from '@/components/panels/Machine/SystemPanel.vue'
+import SupportConfigLoginPanel, {
+    CONFIG_AUTH_STORAGE_KEY,
+} from '@/components/panels/Machine/SupportConfigLoginPanel.vue'
+
 @Component({
     components: {
         SystemPanel,
@@ -37,7 +44,14 @@ import SystemPanel from '@/components/panels/Machine/SystemPanel.vue'
         LogfilesPanel,
         UpdatePanel,
         KlippyStatePanel,
+        SupportConfigLoginPanel,
     },
 })
-export default class PageMachine extends Mixins(BaseMixin) {}
+export default class PageMachine extends Mixins(BaseMixin) {
+    configAuthenticated = sessionStorage.getItem(CONFIG_AUTH_STORAGE_KEY) === '1'
+
+    onAuthenticated() {
+        this.configAuthenticated = true
+    }
+}
 </script>

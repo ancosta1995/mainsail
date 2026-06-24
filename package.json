@@ -8,8 +8,8 @@
         "name": "Stefan Dej"
     },
     "scripts": {
-        "serve": "vite serve",
-        "build": "vite build && npm run build.zip",
+        "serve": "node node_modules/vite/bin/vite.js serve",
+        "build": "node node_modules/vite/bin/vite.js build && npm run build.zip",
         "format": "npm run format:base -- --write",
         "format:base": "prettier .",
         "format:check": "npm run format:base -- --check",
@@ -17,8 +17,8 @@
         "lint:fix": "npm run lint -- --fix",
         "build.zip": "cd ./dist && zip -r mainsail.zip ./ -x '**.DS_Store' ./ && cd ..",
         "i18n-extract": "vue-i18n-extract --vueFiles './src/**/{*.?(js|ts|vue),.i18nignore}' --languageFiles './src/locales/*.json'",
-        "preview": "vite preview",
-        "start": "vite build && vite preview",
+        "preview": "node node_modules/vite/bin/vite.js preview",
+        "start": "node node_modules/vite/bin/vite.js build && node node_modules/vite/bin/vite.js preview",
         "test": "start-server-and-test preview http://127.0.0.1:4173/ 'cypress run'",
         "test:ui": "cypress open",
         "test:unit": "vitest run",

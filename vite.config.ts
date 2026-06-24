@@ -169,6 +169,13 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 8080,
+        proxy: {
+            '/access': { target: 'http://127.0.0.1', changeOrigin: true },
+            '/server': { target: 'http://127.0.0.1', changeOrigin: true },
+            '/printer': { target: 'http://127.0.0.1', changeOrigin: true },
+            '/machine': { target: 'http://127.0.0.1', changeOrigin: true },
+            '/websocket': { target: 'ws://127.0.0.1', ws: true },
+        },
     },
 
     test: {
