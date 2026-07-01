@@ -24,7 +24,7 @@
     </div>
 </template>
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import KlippyStatePanel from '@/components/panels/KlippyStatePanel.vue'
 import UpdatePanel from '@/components/panels/Machine/UpdatePanel.vue'
@@ -32,9 +32,10 @@ import LogfilesPanel from '@/components/panels/Machine/LogfilesPanel.vue'
 import EndstopPanel from '@/components/panels/Machine/EndstopPanel.vue'
 import ConfigFilesPanel from '@/components/panels/Machine/ConfigFilesPanel.vue'
 import SystemPanel from '@/components/panels/Machine/SystemPanel.vue'
-import SupportConfigLoginPanel, {
-    CONFIG_AUTH_STORAGE_KEY,
-} from '@/components/panels/Machine/SupportConfigLoginPanel.vue'
+import SupportConfigLoginPanel from '@/components/panels/Machine/SupportConfigLoginPanel.vue'
+
+/** Chave legada (mod0.1/mod0.2); removida no mount para não persistir sessão. */
+const LEGACY_CONFIG_AUTH_KEY = 'btt_config_auth'
 
 @Component({
     components: {
@@ -48,10 +49,34 @@ import SupportConfigLoginPanel, {
     },
 })
 export default class PageMachine extends Mixins(BaseMixin) {
-    configAuthenticated = sessionStorage.getItem(CONFIG_AUTH_STORAGE_KEY) === '1'
+    configAuthenticated = false
+
+    mounted() {
+        sessionStorage.removeItem(LEGACY_CONFIG_AUTH_KEY)
+    }
+
+    beforeDestroy() {
+        this.lockConfig()
+    }
+
+    beforeRouteLeave(_to: unknown, _from: unknown, next: () => void) {
+        this.lockConfig()
+        next()
+    }
+
+    lockConfig() {
+        this.configAuthenticated = false
+    }
 
     onAuthenticated() {
         this.configAuthenticated = true
+    }
+
+    @Watch('socketIsConnected')
+    onSocketConnectionChanged(isConnected: boolean) {
+        if (!isConnected) {
+            this.lockConfig()
+        }
     }
 }
 </script>

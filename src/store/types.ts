@@ -31,6 +31,9 @@ export interface ConfigJson {
     path?: string | null
     instancesDB?: 'moonraker' | 'browser' | 'json'
     instances?: ConfigJsonInstance[]
+    /** Login da aba MÁQUINA (apenas UI; não é auth Moonraker) */
+    supportConfigUser?: string
+    supportConfigPassword?: string
 }
 
 export interface ConfigJsonInstance {

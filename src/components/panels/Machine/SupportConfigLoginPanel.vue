@@ -39,8 +39,10 @@
 import Component from 'vue-class-component'
 import { Mixins } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
+import type { ConfigJson } from '@/store/types'
 
-export const CONFIG_AUTH_STORAGE_KEY = 'btt_config_auth'
+const DEFAULT_SUPPORT_USER = 'biqu'
+const DEFAULT_SUPPORT_PASSWORD = 'biqu'
 
 @Component
 export default class SupportConfigLoginPanel extends Mixins(BaseMixin) {
@@ -54,27 +56,35 @@ export default class SupportConfigLoginPanel extends Mixins(BaseMixin) {
         this.loading = true
 
         try {
-            const response = await fetch('/access/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: this.username,
-                    password: this.password,
-                    source: 'moonraker',
-                }),
-            })
+            const expected = await this.getExpectedCredentials()
 
-            if (!response.ok) {
-                this.errorMessage = 'Usuário ou senha incorretos.'
+            if (this.username === expected.user && this.password === expected.password) {
+                this.$emit('authenticated')
                 return
             }
 
-            sessionStorage.setItem(CONFIG_AUTH_STORAGE_KEY, '1')
-            this.$emit('authenticated')
-        } catch {
-            this.errorMessage = 'Não foi possível contactar o Moonraker.'
+            this.errorMessage = 'Usuário ou senha incorretos.'
         } finally {
             this.loading = false
+        }
+    }
+
+    async getExpectedCredentials(): Promise<{ user: string; password: string }> {
+        const base = import.meta.env.BASE_URL ?? '/'
+
+        try {
+            const response = await fetch(`${base}config.json`)
+            if (!response.ok) {
+                return { user: DEFAULT_SUPPORT_USER, password: DEFAULT_SUPPORT_PASSWORD }
+            }
+
+            const config = (await response.json()) as ConfigJson
+            return {
+                user: config.supportConfigUser ?? DEFAULT_SUPPORT_USER,
+                password: config.supportConfigPassword ?? DEFAULT_SUPPORT_PASSWORD,
+            }
+        } catch {
+            return { user: DEFAULT_SUPPORT_USER, password: DEFAULT_SUPPORT_PASSWORD }
         }
     }
 }
